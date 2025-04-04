@@ -35,4 +35,11 @@ contract KnowledgeKingGame {
         require(token.balanceOf(msg.sender) >= 1 * 10 ** 18, "Not enough tokens");
         token.transferFrom(msg.sender, _owner, 1 * 10 ** 18);
     }
+
+    function win(address player) external onlyOwner {
+        require(_userExistence[player], "Player not initialized");
+        // Player wins the game and receives 2 tokens
+        require(token.balanceOf(_owner) >= 2 * 10 ** 18, "Not enough tokens in contract");
+        token.transferFrom(_owner, player, 2 * 10 ** 18);
+    }
 }

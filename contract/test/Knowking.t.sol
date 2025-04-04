@@ -54,4 +54,19 @@ contract TokenTest is Test {
         game.play();
         assertEq(token.balanceOf(alice), 4 * 10 ** 18, "Alice should have 4 tokens after playing");
     }
+
+    // test Player win
+    function testWin() public {
+        vm.prank(owner);
+        game.initPlayer(alice);
+        assertEq(token.balanceOf(alice), 5 * 10 ** 18, "Alice should have 5 tokens");
+        vm.prank(alice);
+        token.approve(address(game), 1 * 10 ** 18);
+        vm.prank(alice);
+        game.play();
+        assertEq(token.balanceOf(alice), 4 * 10 ** 18, "Alice should have 4 tokens after playing");
+        vm.prank(owner);
+        game.win(alice);
+        assertEq(token.balanceOf(alice), 6 * 10 ** 18, "Alice should have 6 tokens after winning");
+    }
 }
