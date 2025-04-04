@@ -37,7 +37,8 @@
             packages = with pkgs; [
               node2nix
               nodejs
-              nodePackages.yarn
+              nodePackages.pnpm
+              foundry
             ];
 
             shellHook = ''
