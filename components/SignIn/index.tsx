@@ -13,8 +13,8 @@ export const SignIn = () => {
   } else {
     return (
       <>
-        Not signed in <br />
-        <button onClick={() => signIn()}>Sign in</button>
+        {/* Not signed in <br /> */}
+        <button className="btn" onClick={() => signIn()}>Sign in</button>
       </>
     );
   }
