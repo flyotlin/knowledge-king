@@ -7,6 +7,7 @@ import "./Token.sol";
 contract KnowledgeKingGame {
     IERC20 public token;
     address private _owner;
+    mapping(address => bool) private _userExistence;
 
     constructor(IERC20 _token) {
         // specify the pre-deployed token address
@@ -22,13 +23,16 @@ contract KnowledgeKingGame {
 
     function initPlayer(address player) external onlyOwner {
         // Initialize player with 5 tokens
+        require(!_userExistence[player], "Player already initialized");
         require(token.balanceOf(_owner) >= 5 * 10 ** 18, "Not enough tokens in contract");
+        _userExistence[player] = true;
         token.transferFrom(_owner, player, 5 * 10 ** 18);
     }
 
     function play() external {
+        require(_userExistence[msg.sender], "Player not initialized");
         // Player transfers 1 token for playing
         require(token.balanceOf(msg.sender) >= 1 * 10 ** 18, "Not enough tokens");
-        token.transfer(_owner, 1 * 10 ** 18);
+        token.transferFrom(msg.sender, _owner, 1 * 10 ** 18);
     }
 }
