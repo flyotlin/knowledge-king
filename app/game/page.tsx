@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import data from '../../questions.json'
+import Link from 'next/link';
 
 interface YesNoProblem {
   question: string
@@ -112,6 +113,9 @@ export default function Game() {
               {correctAnswers >= 8 ? "Get your token!" : "Try again!"}
             </h2>
             <p className="text-gray-800">You answered {correctAnswers} questions correctly.</p>
+            <Link href="/" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+              Go Back to Home
+            </Link>
           </div>
         ) : (
           <>
