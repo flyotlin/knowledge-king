@@ -1,16 +1,16 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import data from '../../questions.json'
-import Link from 'next/link';
 import GameResult from '@/components/Game/result';
+import axios from 'axios';
+import { getWalletAddress } from '@/utils/wallet';
 
 interface YesNoProblem {
+  id: number
   question: string
   realAnswer: boolean
   userAnswer: boolean // true: Yes, false: No
 }
-const allProblems: YesNoProblem[] = data.map(d => ({...d, realAnswer: d.answer, userAnswer: true }))
 
 function RadioSelect({ selectedAnswer, onChange }: { selectedAnswer: boolean; onChange: (answer: boolean) => void }) {
   return (
@@ -54,20 +54,49 @@ function Control({ handlePrev, handleNext, isLast }: ControlProps) {
   )
 }
 
+// 2. create quiz if not exist (`POST /quiz`)
+// 3. get quiz questions by quiz id (`GET /quiz/:quiz_id`)
+// 4. show quiz questions and let user answer
+// 5. verify quiz (`POST /quiz/:quiz_id/verify`, [userAnswers]), and backend send reward
 export default function Game() {
   const [start, setStart] = useState<number>(0)
   const [index, setIndex] = useState<number>(0)
   const numberOfProblems = 10
-  const problems: YesNoProblem[] = allProblems.concat(allProblems).slice(start, start + numberOfProblems)
+  const [problems, setProblems] = useState<YesNoProblem[]>([])
+  // const problems: YesNoProblem[] = allProblems.concat(allProblems).slice(start, start + numberOfProblems)
   const [userAnswers, setUserAnswers] = useState<boolean[]>(Array(numberOfProblems).fill(true))
   const [showResult, setShowResult] = useState<boolean>(false)
   const [correctAnswers, setCorrectAnswers] = useState<number>(0)
+  const [loading, setLoading] = useState<boolean>(true);
+  const [quizId, setQuizId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
-    const i = Date.now() % data.length
-    setStart(i)
-    setIndex(0)
-  }, [])
+    const createQuiz = async () => {
+      try {
+        const address = await getWalletAddress()
+        console.log(`create quiz: address: ${address}`)
+        const response = await axios.post(`http://localhost:8000/quiz?user_id=${address}`)
+        const qs = response.data.questions
+        setProblems(qs.map(q => ({
+          id: q.id,
+          question: q.question,
+          realAnswer: q.answer,
+          userAnswer: true,
+        })))
+        setQuizId(response.data.quiz_id)
+      } catch (error) {
+        console.error("failed to create quiz")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    createQuiz()
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   const handleNext = () => {
     if (isLast()) {
@@ -96,10 +125,24 @@ export default function Game() {
     problems[index].userAnswer = answer
   }
 
-  const handleSubmit = () => {
-    const correctCount = userAnswers.filter((answer, idx) => answer === problems[idx].realAnswer).length
-    setCorrectAnswers(correctCount)
-    setShowResult(true)
+  const handleSubmit = async () => {
+    // send verify
+    const createQuiz = async () => {
+      try {
+        const address = await getWalletAddress()
+        console.log(`verify quiz: address: ${address}`)
+        const response = await axios.post(`http://localhost:8000/quiz/${quizId}/verify`,
+          problems.map(p => (p.userAnswer))
+        )
+        console.log(`verify quiz: response: ${response}`)
+        const n = response.data.correct_answers
+        setCorrectAnswers(n)
+        setShowResult(true)
+      } catch (error) {
+        console.error(`failed to verify quiz: ${error}`)
+      }
+    }
+    await createQuiz()
   }
 
   return (
