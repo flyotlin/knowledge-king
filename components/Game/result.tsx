@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ethers } from "ethers";
+import { ethers, parseEther } from "ethers";
 import { useState } from "react";
 import KnowledgeKingGameABI from "../../KnowledgeKingGameABI.json"
 import KnowledgeKingTokenABI from "../../KnowledgeKingTokenABI.json"
+import { getWalletAddress } from "@/utils/wallet";
 
 export default function GameResult({ correctAnswers }: { correctAnswers: number }) {
   const [account, setAccount] = useState<string>('')
@@ -43,7 +44,14 @@ export default function GameResult({ correctAnswers }: { correctAnswers: number 
     try {
         // Call the function on the contract
         // const result = await contract.yourFunctionName(); // Replace with your function name
-        const result = await gameContract.initPlayer(account);
+        const addr = await getWalletAddress()
+        console.log(`account: ${addr}`)
+        // const result = await gameContract.initPlayer("0xa5C05e3390ea6f85f9cdbeB3B62FD8df39DDd5f8");
+        // const result = await gameContract.end();
+        // const approveResult = await tokenContract.approve(gameAddress, parseEther("5000000000000000000"));
+        // console.log(approveResult)
+        const result = await gameContract.play();
+        // const result = await gameContract.win(addr);
         console.log("Function result:", result);
     } catch (error) {
         console.error("Error calling contract function:", error);
@@ -58,7 +66,6 @@ export default function GameResult({ correctAnswers }: { correctAnswers: number 
       <h2 className="text-lg font-bold">
         {correctAnswers >= 8 ? "Get your token!" : "Try again!"}
       </h2>
-      <div>Account: {account || 'Wallet not connected'} </div>
       <button className="btn" onClick={callContractFunction}>Init Player</button>
       <p className="text-gray-800">You answered {correctAnswers} questions correctly.</p>
       <Link href="/" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">

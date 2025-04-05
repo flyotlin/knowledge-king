@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import GameResult from '@/components/Game/result';
 import axios from 'axios';
-import { getWalletAddress } from '@/utils/wallet';
+import { getWalletAddress, initPlayer, playGame } from '@/utils/wallet';
 
 interface YesNoProblem {
   id: number
@@ -71,6 +71,16 @@ export default function Game() {
   const [quizId, setQuizId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
+    const play = async () => {
+      try {
+        // const address = await getWalletAddress()
+        // await initPlayer(address!)
+        await playGame()
+      } catch (error) {
+        console.error(`Failed to play a new game: ${error}`)
+      }
+    }
+
     const createQuiz = async () => {
       try {
         const address = await getWalletAddress()
@@ -91,6 +101,7 @@ export default function Game() {
       }
     }
 
+    // play()
     createQuiz()
   }, []);
 
