@@ -14,8 +14,11 @@ export default function GameResult({ correctAnswers }: { correctAnswers: number 
   // const gameABI = [ /* ABI goes here */ ];
   const gameABI = KnowledgeKingGameABI
   const tokenABI = KnowledgeKingTokenABI
-  const gameAddress = "0xa5C05e3390ea6f85f9cdbeB3B62FD8df39DDd5f8";
-  const tokenAddress = "0x37A00a8e37Cd8f0a1365728e181CD1EfAA7551Ee";
+  //
+  // const gameAddress = "0x7940e75EA668dC7A259A2839582b443Ecbc5305D";
+  // const tokenAddress = "0x587D89f48c8B9f8ca1cbE9BD7037FBcdF57D80bB";
+  const gameAddress = process.env.GAME_CONTRACT_ADDR || '0x7F6c26Ec2b8e51b9C5aCA23f1E248132f37E0d78'
+  const tokenAddress = process.env.TOKEN_CONTRACT_ADDR || '0xB568AD7C4dEe6A79136507E13fC8672fa2399018'
 
 
   async function callContractFunction() {
@@ -64,9 +67,9 @@ export default function GameResult({ correctAnswers }: { correctAnswers: number 
   return (
     <div className="w-96 bg-white p-6 rounded-lg shadow-md mb-4 mx-auto text-center">
       <h2 className="text-lg font-bold">
-        {correctAnswers >= 8 ? "Get your token!" : "Try again!"}
+        {correctAnswers >= 9 ? "Two KKT tokens were rewarded!" : "Try again!"}
       </h2>
-      <button className="btn" onClick={callContractFunction}>Init Player</button>
+      {/* <button className="btn" onClick={callContractFunction}>Init Player</button> */}
       <p className="text-gray-800">You answered {correctAnswers} questions correctly.</p>
       <Link href="/" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
         Go Back to Home

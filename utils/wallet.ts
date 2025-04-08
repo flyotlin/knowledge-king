@@ -1,4 +1,4 @@
-import { Contract } from "ethers";
+import { Contract, parseEther } from "ethers";
 import { BrowserProvider } from "ethers";
 import gameABI from "../KnowledgeKingGameABI.json"
 import tokenABI from "../KnowledgeKingTokenABI.json"
@@ -16,6 +16,7 @@ async function getWalletAddress(): Promise<string | undefined> {
 
   try {
     const provider = new BrowserProvider(window.ethereum)
+    console.log(provider)
     const signer = await provider.getSigner()
     return await signer.getAddress()
   } catch (error) {
@@ -47,8 +48,33 @@ async function connectWallet() {
   }
 }
 
+async function approve() {
+  if (!window.ethereum) {
+    console.log("connect to your wallet first")
+    return false
+  }
 
-const gameAddress = "0xa5C05e3390ea6f85f9cdbeB3B62FD8df39DDd5f8";
+  // Connect to the Ethereum provider
+  const provider = new BrowserProvider(window.ethereum)
+  const signer = await provider.getSigner();
+  console.log(`tokenAddress: ${tokenAddress}`)
+  console.log(`gameAddress: ${gameAddress}`)
+  const tokenContract = new Contract(tokenAddress!, tokenABI, signer);
+
+  try {
+      const tx = await tokenContract.approve(gameAddress, parseEther("5000000000000000000"));
+      console.log("Function result:", tx);
+      await tx.wait()
+      return true
+  } catch (error) {
+      console.error("Error calling 'initPlayer' function:", error);
+      return false
+  }
+}
+
+//
+// const gameAddress = "0x7940e75EA668dC7A259A2839582b443Ecbc5305D";
+const gameAddress = process.env.GAME_CONTRACT_ADDR || '0x7F6c26Ec2b8e51b9C5aCA23f1E248132f37E0d78'
 async function initPlayer(playerAccount: string): boolean {
   if (!window.ethereum) {
     console.log("connect to your wallet first")
@@ -60,8 +86,9 @@ async function initPlayer(playerAccount: string): boolean {
   const signer = await provider.getSigner();
   const gameContract = new Contract(gameAddress, gameABI, signer);
   try {
-      const result = await gameContract.initPlayer(playerAccount);
-      console.log("Function result:", result);
+      const tx = await gameContract.initPlayer(playerAccount);
+      console.log("Function result:", tx);
+      await tx.wait()
       return true
   } catch (error) {
       console.error("Error calling 'initPlayer' function:", error);
@@ -84,8 +111,9 @@ async function playGame() {
   try {
       let tokenResult = await tokenContract.balanceOf(await signer.getAddress());
       console.log(`balanceOf result: ${tokenResult}`)
-      const result = await gameContract.play();
-      console.log("play result:", result);
+      const tx = await gameContract.play();
+      await tx.wait()
+      console.log("play result:", tx);
       return true
   } catch (error) {
       console.error("Error calling 'playGame' function:", error);
@@ -93,7 +121,9 @@ async function playGame() {
   }
 }
 
-const tokenAddress = "0x37A00a8e37Cd8f0a1365728e181CD1EfAA7551Ee";
+//
+// const tokenAddress = "0x587D89f48c8B9f8ca1cbE9BD7037FBcdF57D80bB";
+const tokenAddress = process.env.TOKEN_CONTRACT_ADDR || '0xB568AD7C4dEe6A79136507E13fC8672fa2399018'
 async function getKKTBalance(): number {
   if (!window.ethereum) {
     console.log("connect to your wallet first")
@@ -118,4 +148,5 @@ export {
   connectWallet,
   initPlayer,
   playGame,
+  approve,
 }
